@@ -60,6 +60,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Prepare existing Wrangler version outside application dependencies
+        run: |
+          npm install --prefix "$RUNNER_TEMP/landing-wrangler" --no-save --package-lock=false wrangler@3.90.0
+          ln -s "$RUNNER_TEMP/landing-wrangler/node_modules/wrangler" node_modules/wrangler
+          ln -s "$RUNNER_TEMP/landing-wrangler/node_modules/.bin/wrangler" node_modules/.bin/wrangler
+          test "$(node -p "require('./node_modules/wrangler/package.json').version")" = "3.90.0"
+          npx --no-install wrangler --version
+
       - name: Build landing site
         run: pnpm run build
 
@@ -75,6 +83,8 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          packageManager: npm
+          wranglerVersion: "3.90.0"
           command: >-
             pages deploy dist
             --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }}
