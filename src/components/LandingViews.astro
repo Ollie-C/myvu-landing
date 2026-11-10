@@ -12,7 +12,7 @@ import { APP_URL } from '../config';
   <section id="view-score" role="region" aria-label="Score a title" tabindex="-1" data-view-panel="score">
     <Hero />
     <section class="welcome" aria-labelledby="welcome-title">
-      <div><h2 id="welcome-title">Welcome to <strong>tenagain.</strong></h2><p class="welcome-about">Your movie and TV taste, scored, ranked and shared.</p><p data-competition-fallback hidden>Can't load this month's event. <a href={`${APP_URL}/competitions/current`}>Open competitions ↗</a></p></div>
+      <div><h2 id="welcome-title">Welcome to <strong>tenagain.</strong></h2></div>
       <p class="welcome-cycle"><span>Watch,</span><span>Rate,</span><span>Rank,</span><span>Watch.</span></p>
     </section>
   </section>
@@ -28,7 +28,6 @@ import { APP_URL } from '../config';
     const arrows = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-view-prev], [data-view-next]'));
     const navigation = root.querySelector<HTMLElement>('[data-view-navigation]');
     const entry = root.querySelector<HTMLButtonElement>('[data-view-entry]');
-    const fallback = root.querySelector<HTMLElement>('[data-competition-fallback]');
     const competitionLink = root.querySelector<HTMLAnchorElement>('[data-competition-link]');
     const announcement = root.querySelector<HTMLElement>('[data-view-announcement]');
     const panels = Array.from(root.querySelectorAll<HTMLElement>('[data-view-panel]'));
@@ -124,10 +123,9 @@ import { APP_URL } from '../config';
         liveLabel = state.round ? `Monthly live · Round ${state.round} ↗` : 'Monthly live ↗';
         if (entry && active === 'score') entry.textContent = liveLabel;
         if (competitionLink && typeof state.slug === 'string' && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(state.slug)) competitionLink.href = `${appOrigin}/competitions/${state.slug}`;
-        if (fallback) fallback.hidden = true;
         setAvailability(state.active);
       } catch {
-        if (fallback) fallback.hidden = false;
+        setAvailability(false);
       }
     }
     entry?.addEventListener('click', () => select(active === 'score' ? 'monthly' : 'score'));
@@ -163,17 +161,16 @@ import { APP_URL } from '../config';
 <style>
 [hidden]{display:none!important}
 .view-bricks{position:fixed;inset:0;z-index:25;display:grid;grid-template-rows:repeat(8,1fr);pointer-events:none}
-.view-navigation{position:fixed;inset:0;z-index:30;pointer-events:none;color:#fff}
-.view-entry{position:absolute;top:5.5rem;right:clamp(1rem,4vw,4rem);pointer-events:auto;padding:6px 10px;border:1px solid #ffffff66;background:#101010cc;color:#fff;font-size:11px;box-shadow:none}
-.view-entry:hover{background:#101010;transform:none;box-shadow:none}
-.welcome-about,.competition-link{font-size:13px;line-height:1.5;color:#bbb;margin:12px 0}
-.competition-link{margin-bottom:16px}
-.view-arrow{position:absolute;top:50%;transform:translateY(-50%);display:flex;align-items:center;justify-content:center;width:64px;height:112px;padding:8px;border:0;box-shadow:none;background:transparent;color:rgba(255,255,255,.8);cursor:pointer;border-radius:0;pointer-events:auto;transition:color 150ms ease}
-.view-arrow--prev{left:clamp(4px,1vw,18px)}.view-arrow--next{right:clamp(4px,1vw,18px)}
-.view-arrow svg{width:48px;height:80px;filter:drop-shadow(0 1px 8px rgba(0,0,0,.7))}
-.view-arrow:hover,.view-arrow:active{color:#fff;background:transparent;box-shadow:none;transform:translateY(-50%)}
-.view-arrow:focus-visible{outline:2px solid #fff;outline-offset:-4px}
-.monthly-stage{width:calc(100% - 160px);max-width:1180px;margin:auto;padding:7rem 0 3rem;min-height:100svh}
+.view-navigation{position:fixed;top:5.25rem;left:50%;transform:translateX(-50%);width:max-content;max-width:calc(100% - 3rem);z-index:30;display:flex;align-items:center;gap:4px;padding:2px;border:1px solid #ffffff40;background:#101010b3;color:#fff;backdrop-filter:blur(10px)}
+.view-entry{order:1;min-height:32px;padding:4px 8px;border:0;background:transparent;color:#ddd;font-size:11px;box-shadow:none}
+.view-entry:hover{background:#ffffff12;color:#fff;transform:none;box-shadow:none}
+.competition-link{font-size:13px;line-height:1.5;color:#bbb;margin:12px 0 16px}
+.view-arrow{display:flex;align-items:center;justify-content:center;width:28px;height:32px;padding:6px;border:0;box-shadow:none;background:transparent;color:#ccc;cursor:pointer;border-radius:0}
+.view-arrow--prev{order:0}.view-arrow--next{order:2}
+.view-arrow svg{width:14px;height:18px}
+.view-arrow:hover,.view-arrow:active{color:#fff;background:#ffffff12;box-shadow:none;transform:none}
+.view-arrow:focus-visible{outline:2px solid #fff;outline-offset:0}
+.monthly-stage{width:calc(100% - 160px);max-width:1180px;margin:auto;padding:10rem 0 3rem;min-height:100svh}
 .monthly-stage iframe{display:block;width:100%;height:850px;min-height:0;border:0;background:#101010;color-scheme:dark}
 .welcome{max-width:1180px;margin:auto;padding:72px 48px 32px;display:grid;grid-template-columns:1fr 1fr;gap:24px;color:#eee;border-top:1px solid #333}
 .welcome h2{font-size:clamp(20px,2.5vw,30px);font-weight:400;line-height:1.4;margin:4px 0 0;color:#aaa}
@@ -185,5 +182,6 @@ import { APP_URL } from '../config';
 :global(body[data-landing-view=monthly]){background:#101010!important}
 :global(body[data-landing-view=monthly]::before),:global(body[data-landing-view=monthly]::after),:global(body[data-landing-view=monthly] .landing-nav::after){display:none}
 :global(body[data-landing-view=monthly] .media-switcher){visibility:hidden}
-@media(max-width:760px){.view-arrow{width:36px;height:88px;padding:4px}.view-arrow svg{width:28px;height:60px}.view-arrow--prev{left:0}.view-arrow--next{right:0}.monthly-stage{width:calc(100% - 80px);padding:7rem 0 2rem}.welcome{padding:44px 32px 28px;grid-template-columns:1fr;gap:24px}.welcome-cycle{font-size:52px}}
+@media(max-width:639px){.view-navigation{top:8rem}}
+@media(max-width:760px){.monthly-stage{width:calc(100% - 80px);padding:12rem 0 2rem}.welcome{padding:44px 32px 28px;grid-template-columns:1fr;gap:24px}.welcome-cycle{font-size:52px}}
 </style>

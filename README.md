@@ -47,6 +47,14 @@ Score preserves the cinematic rating flow. Monthly shows the app's competition w
 
 Configure `PUBLIC_APP_URL` for the app. The app's `PUBLIC_LANDING_URL` must match this landing origin, and both production sites should share the HTTPS registrable domain so app-domain session cookies work inside the widget. Backend voting/Turnstile setup is documented in `../docs/architecture/weekly-competitions.md`.
 
+## Score preview
+
+The initial title is Shōgun in TV mode. The editable score begins with a random suggestion; editing a valid score reveals the submit chevron and pauses title rotation. Scores use one decimal place from 0 to 10, including the app's `/start` intake.
+
+The landing requests `/api/community/score-distribution?mediaType=movie|tv_show` from the app, which proxies Phoenix's public endpoint at the same path. This requires the matching backend and app changes to be deployed. No app-account credentials or guest session are needed. The frontend Pages beta password entrance currently gates every endpoint, so credential-free landing requests hide the placement text on gated deployments. Local Vite is unaffected. Set `PUBLIC_LANDING_URL` on the app to the exact preview origin for local CORS access.
+
+The distribution uses the community chart's Bayesian weighted scores, excludes archived/unrated titles, and groups scores to one decimal place. Placement compares the proposed score against these groups; tied scores produce a range, and a score in a gap produces an insertion position. It does not predict the effect of one vote on a title's community consensus. The displayed chart size makes its scope clear. Empty charts and failed requests display no placement text. Aggregate results are cached for up to ten minutes and use the chart's existing invalidation when ratings change.
+
 ## GitHub staging deployment configuration
 
 The `Deploy staging` workflow uses this repository's GitHub **staging** environment. Configure these under Settings → Environments → staging (or as repository settings available to the workflow):
